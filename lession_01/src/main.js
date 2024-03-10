@@ -7,3 +7,5 @@ import {logger} from './abc';
 createApp(App).mount('#app');
 
 logger();
+
+console.log(logger().canh);
