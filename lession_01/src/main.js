@@ -2,10 +2,10 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 
-import {logger} from './abc';
+// import { logger } from './abc';
 
 createApp(App).mount('#app');
 
-logger();
+// logger();
 
-console.log(logger().canh);
+// console.log(a);

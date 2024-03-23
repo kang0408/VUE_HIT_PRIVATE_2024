@@ -12,5 +12,5 @@ function logger(content = "Hello world!") {
 
 const a = 12;
 
-export { logger, a};
+export default logger();
 // export default logger;
