@@ -164,7 +164,7 @@
 .weather--more p {
     font-size: 100px;
     text-align: center;
-    font-weight: 500;
+    font-weight: bold;
     color: #F7EEDD;
 }
 
