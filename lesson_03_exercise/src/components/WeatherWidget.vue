@@ -123,7 +123,7 @@
                 <!-- Show weather -->
                 <div class="weather flex center">
                     <div class="weather-icon">
-                        <img src="../assets/10d@2x 1.png" :srcset="weatherLocation.icon" alt="">
+                        <img src="https://openweathermap.org/img/wn/10d@2x.png" :srcset="weatherLocation.icon" alt="">
                     </div>
                     <p class="weather-desc">{{ weatherLocation.desc }}</p>
                 </div>
@@ -217,8 +217,19 @@ $fontText: "Kanit", sans-serif;
             }
 
             select:hover {
-                border-color: #008DDA;
+                border-color: $primaryColor;
                 cursor: pointer;
+            }
+
+            button {
+                border: 2px solid;
+                transition: all .5s
+            }
+
+            button:hover {
+                background-color: $primaryColor;
+                color: #fff;
+                border-color: #939393;
             }
         }
 
