@@ -29,47 +29,72 @@
         fetch(apiEndPoint, {headers: {"X-CSCAPI-KEY": config.cKey}})
             .then(res => res.json())
             .then(data => {
-                countries.value = data;
                 console.log(data);
+                countries.value = data;
             })
             .catch(error => console.error(error));
     }
 
     const states = ref(); // This variables is to store state's list
-    const selectedStatesCode = ref(""); // This variables is to store state's code
+    const selectedStatesName = ref(""); // This variables is to store state's code
 
     function loadStates() {
         console.log(selectedCountryCode.value);
-        selectedCityId.value = ' ';
         fetch(`${config.cUrl}/${selectedCountryCode.value}/states`, {headers: {"X-CSCAPI-KEY": config.cKey}})
             .then(res => res.json())
             .then(data => {
+                console.log(data);
                 states.value = data;
-                console.log(data);
-            })
-            .catch(error => console.error(error));
-    }
-
-    const cities = ref(); // This variables is to store state's list
-    const selectedCityId = ref(" "); // This variables is to store state's id
-
-    function loadCities() {
-        console.log(selectedCountryCode.value, selectedStatesCode.value);
-
-        fetch(`${config.cUrl}/${selectedCountryCode.value}/states/${selectedStatesCode.value}/cities`, {headers: {"X-CSCAPI-KEY": config.cKey}})
-            .then(res => res.json())
-            .then(data => {
-                cities.value = data;
-                console.log(data);
             })
             .catch(error => console.error(error));
     }
 
     window.onload = loadCountries;
 
+    var appId = '8023e1a0c0e3b8ce6950f19db954402b';
+    const location = ref();
+
+    const searchLatLon = computed(() => {
+        console.log(selectedCountryCode.value, selectedStatesName.value);
+        
+        fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${selectedStatesName.value}, ${selectedStatesName.value}, ${selectedCountryCode.value}&appid=${appId}`)
+            .then(res => res.json())
+            .then(data => {
+                location.value = data;
+                console.log(data);
+            })
+            .catch (error => console.error(error));        
+    }) 
+    
+    let inforLocation = ref([]);
+
+    let weatherLocation = ref({
+        desc: 'Mostly Cloudy', /* description */
+        icon: '', /*icon */
+        temp: 20 + '°C', /*temperature */
+        lname: 'Doha', /* location name */
+        cname: 'Qatar' /* country name */
+
+    })
+    
+    const searchWeather = computed(() => {
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${location.value[0].lat}&lon=${location.value[0].lon}&appid=${appId}`)
+            .then(res => res.json())
+            .then(data => {
+                inforLocation.value = data;
+                weatherLocation.value.desc = inforLocation.value['weather'][0].description;
+                weatherLocation.value.temp = Math.round(inforLocation.value.main.temp - 273.15) + '°C';
+                weatherLocation.value.lname = inforLocation.value.name;
+                weatherLocation.value.cname = inforLocation.value.sys.country;
+                console.log(inforLocation.value['weather'][0].icon);
+                weatherLocation.value.icon = `https://openweathermap.org/img/wn/${inforLocation.value['weather'][0].icon}@2x.png`;
+            })
+            .catch(error => console.error(error));
+    })
 </script>
 <template>
     <div>
+        <!-- Welcome -->
         <div v-if="!answer" class="question fade flex center">
             <h1>Ngoài bị điên ra bạn còn bị gì nữa không?</h1>
             <div class="answer">
@@ -77,8 +102,10 @@
                 <button class="ignoredButton" @click="randomPos" :style="{left: left + 'px', top: top + 'px'}">Không</button>
             </div>
         </div>
+        <!-- Content -->
         <div v-if="answer" class="content flex center fade">
             <div class="weather--wrap flex center swipe-to-right" :class="{'swipe-to-left': showMore}">
+                <!-- Select location -->
                 <div class="location">
                     <h3>Select Country, State, City</h3>
                     <div class="location-wrap">
@@ -86,26 +113,24 @@
                             <option disabled value="">Select country</option>
                             <option v-for="(item, index) in countries" :key="index" :value="item.iso2">{{ item.name}}</option>
                         </select>
-                        <select class="state" @change="loadCities" v-model="selectedStatesCode">
+                        <select class="state" @change="searchLatLon" v-model="selectedStatesName">
                             <option disabled value="">Select state</option>
-                            <option v-for="(item, index) in states" :key="index" :value="item.iso2">{{ item.name }}</option>
+                            <option v-for="(item, index) in states" :key="index" :value="item.name">{{ item.name }}</option>
                         </select>
-                        <select class="city" v-model="selectedCityId">
-                            <option disabled value="">Select city</option>
-                            <option v-for="(item, index) in cities" :key="index" :value="item.id">{{ item.name }}</option>
-                        </select>
+                        <button @click="searchWeather">Check!</button>
                     </div>
                 </div>
+                <!-- Show weather -->
                 <div class="weather flex center">
                     <div class="weather-icon">
-                        <img src="../assets/10d@2x 1.png" alt="">
+                        <img src="../assets/10d@2x 1.png" :srcset="weatherLocation.icon" alt="">
                     </div>
-                    <p class="weather-desc">Mostly cloudy</p>
+                    <p class="weather-desc">{{ weatherLocation.desc }}</p>
                 </div>
                 <div class="line"></div>
                 <div class="weather-infor">
-                    <p class="weather-degree">21°C</p>
-                    <p class="weather-desc">Doha, Quatar</p>
+                    <p class="weather-degree">{{ weatherLocation.temp }}</p>
+                    <p class="weather-desc">{{ weatherLocation.lname }}, {{ weatherLocation.cname }}</p>
                 </div>
                 <div class="weather--more-text" @click="showMore = !showMore">
                     <p>+ More</p>
@@ -165,7 +190,7 @@ $fontText: "Kanit", sans-serif;
         width: 890px;
         height: 400px;
         border-radius: 30px;
-        gap: 40px;
+        gap: 20px;
         position: relative;
         @extend .linear-bg;
         @extend .box-shadow;
@@ -200,6 +225,10 @@ $fontText: "Kanit", sans-serif;
         .weather {
             flex-direction: column;
             padding-top: 36px;
+            width: 30%;
+            height: 100%;
+            text-align: center;
+            
 
             .weather-icon {
                 width: 140px;
