@@ -14,10 +14,63 @@
 
     const answer = ref(false);
     const showMore = ref(false);
+
+    var config = {
+        cUrl: 'https://api.countrystatecity.in/v1/countries',
+        cKey: 'NHhvOEcyWk50N2Vna3VFTE00bFp3MjFKR0ZEOUhkZlg4RTk1MlJlaA=='
+    }
+
+    const countries = ref();    // This variables is to store country's list
+    const selectedCountryCode = ref(""); // This variables is to store country's code - example: VN
+
+    function loadCountries() {
+        let apiEndPoint = config.cUrl;
+
+        fetch(apiEndPoint, {headers: {"X-CSCAPI-KEY": config.cKey}})
+            .then(res => res.json())
+            .then(data => {
+                countries.value = data;
+                console.log(data);
+            })
+            .catch(error => console.error(error));
+    }
+
+    const states = ref(); // This variables is to store state's list
+    const selectedStatesCode = ref(""); // This variables is to store state's code
+
+    function loadStates() {
+        console.log(selectedCountryCode.value);
+        selectedCityId.value = ' ';
+        fetch(`${config.cUrl}/${selectedCountryCode.value}/states`, {headers: {"X-CSCAPI-KEY": config.cKey}})
+            .then(res => res.json())
+            .then(data => {
+                states.value = data;
+                console.log(data);
+            })
+            .catch(error => console.error(error));
+    }
+
+    const cities = ref(); // This variables is to store state's list
+    const selectedCityId = ref(" "); // This variables is to store state's id
+
+    function loadCities() {
+        console.log(selectedCountryCode.value, selectedStatesCode.value);
+
+        fetch(`${config.cUrl}/${selectedCountryCode.value}/states/${selectedStatesCode.value}/cities`, {headers: {"X-CSCAPI-KEY": config.cKey}})
+            .then(res => res.json())
+            .then(data => {
+                cities.value = data;
+                console.log(data);
+            })
+            .catch(error => console.error(error));
+    }
+
+    window.onload = loadCountries;
+
 </script>
 <template>
     <div>
-        <div v-if="!answer" class="question flex center">
+        <div v-if="!answer" class="question fade flex center">
             <h1>Ngoài bị điên ra bạn còn bị gì nữa không?</h1>
             <div class="answer">
                 <button @click="answer = !answer">Có</button>
@@ -26,6 +79,23 @@
         </div>
         <div v-if="answer" class="content flex center fade">
             <div class="weather--wrap flex center swipe-to-right" :class="{'swipe-to-left': showMore}">
+                <div class="location">
+                    <h3>Select Country, State, City</h3>
+                    <div class="location-wrap">
+                        <select class="country" @change="loadStates" v-model="selectedCountryCode">
+                            <option disabled value="">Select country</option>
+                            <option v-for="(item, index) in countries" :key="index" :value="item.iso2">{{ item.name}}</option>
+                        </select>
+                        <select class="state" @change="loadCities" v-model="selectedStatesCode">
+                            <option disabled value="">Select state</option>
+                            <option v-for="(item, index) in states" :key="index" :value="item.iso2">{{ item.name }}</option>
+                        </select>
+                        <select class="city" v-model="selectedCityId">
+                            <option disabled value="">Select city</option>
+                            <option v-for="(item, index) in cities" :key="index" :value="item.id">{{ item.name }}</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="weather flex center">
                     <div class="weather-icon">
                         <img src="../assets/10d@2x 1.png" alt="">
@@ -40,8 +110,10 @@
                 <div class="weather--more-text" @click="showMore = !showMore">
                     <p>+ More</p>
                 </div>
+                <div class="back-btn" @click="answer = !answer">&lt;</div>
             </div>
             <div v-if="showMore" class="weather--more swipe-fade-to-right">
+                <div class="exit" @click="showMore = !showMore">x</div>
                 <p>no <br> more!</p>
             </div>
         </div>
@@ -87,6 +159,7 @@ $fontText: "Kanit", sans-serif;
 
 .content {
     transition: all 1s;
+    position: relative;
 
     .weather--wrap {
         width: 890px;
@@ -96,6 +169,33 @@ $fontText: "Kanit", sans-serif;
         position: relative;
         @extend .linear-bg;
         @extend .box-shadow;
+
+        
+        .location {
+            position: fixed;
+            top: 50px;
+            text-align: center;
+            width: 60%;
+            z-index: 999;
+
+            .location-wrap {
+                display: flex;
+                justify-content: space-around;
+            }
+
+            select {
+                font-size: 20px;
+                width: 30%;
+                padding: 5px;
+                border: 2px solid;
+                border-radius: 5px;
+            }
+
+            select:hover {
+                border-color: #008DDA;
+                cursor: pointer;
+            }
+        }
 
         .weather {
             flex-direction: column;
@@ -160,10 +260,27 @@ $fontText: "Kanit", sans-serif;
             position: absolute;
         }
 
+        .weather--more-text:hover {
+            color: $thirdColor;
+        }
+
         .weather--more-text p {
             font-size: 18px;
             font-weight: 400;
             cursor: pointer;
+        }
+
+        .back-btn {
+            font-size: 22px;
+            font-weight: bold;
+            position: absolute;
+            top: 0;
+            left: 12px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            color: $thirdColor;
         }
     }
 
@@ -175,6 +292,19 @@ $fontText: "Kanit", sans-serif;
         position: relative;
         @extend .linear-bg;
         @extend .box-shadow;
+
+        .exit {
+            position: absolute;
+            right: 20px;
+            top: 0px;
+            font-weight: 500;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .exit:hover {
+            color: $thirdColor;
+        }
 
         p {
             font-size: 100px;
