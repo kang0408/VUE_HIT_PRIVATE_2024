@@ -47,8 +47,13 @@
         </div>
     </div>
 </template>
-<style scoped lang="scss">
+<style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+$primaryColor: #008DDA;
+$secondColor: #41C9E2;
+$thirdColor: #F7EEDD;
+$fontText: "Kanit", sans-serif;
 
 .flex {
     display: flex;
@@ -57,6 +62,16 @@
 .center {
     justify-content: center;
     align-items: center;
+}
+
+.box-shadow {
+    -webkit-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.32);
+    -moz-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.32);
+    box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.32);
+}
+
+.linear-bg {
+    background: linear-gradient(180deg, $primaryColor 0%, $secondColor 90%);
 }
 
 .question {
@@ -76,11 +91,11 @@
     .weather--wrap {
         width: 890px;
         height: 400px;
-        background: rgb(0,141,218);
-        background: linear-gradient(180deg, rgba(0,141,218,1) 0%, rgba(65,201,226,1) 90%);
         border-radius: 30px;
         gap: 40px;
         position: relative;
+        @extend .linear-bg;
+        @extend .box-shadow;
 
         .weather {
             flex-direction: column;
@@ -89,7 +104,7 @@
             .weather-icon {
                 width: 140px;
                 height: 140px;
-                background-color: #41C9E2;
+                background-color: $secondColor;
                 border-radius: 30px;
                 overflow: hidden;
             }
@@ -108,16 +123,16 @@
         }
 
         .weather-desc {
-            font-family: "Kanit", sans-serif;
+            font-family: $fontText;
             font-weight: 200;
             font-size: 32px;
-            color: #F7EEDD;
+            color: $thirdColor;
         }
 
         .line {
             height: 90%;
             width: 2px;
-            background-color: #F7EEDD;
+            background-color: $thirdColor;
             margin: 0 46px;
         }
 
@@ -125,10 +140,10 @@
             position: relative;
 
             .weather-degree {
-                font-family: "Kanit", sans-serif;
+                font-family: $fontText;
                 font-weight: 500;
                 font-size: 200px;
-                color: #F7EEDD;
+                color: $thirdColor;
                 padding-bottom: 80px;
             }
 
@@ -155,17 +170,17 @@
     .weather--more {
         width: 400px;
         height: 550px;
-        background: rgb(0,141,218);
-        background: linear-gradient(180deg, rgba(0,141,218,1) 0%, rgba(65,201,226,1) 100%);
         margin-left: 50px;
         border-radius: 30px;
         position: relative;
+        @extend .linear-bg;
+        @extend .box-shadow;
 
         p {
             font-size: 100px;
             text-align: center;
             font-weight: bold;
-            color: #F7EEDD;
+            color: $thirdColor;
         }
     }
 }
