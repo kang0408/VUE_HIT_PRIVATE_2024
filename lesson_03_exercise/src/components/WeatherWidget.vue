@@ -1,6 +1,7 @@
 <script setup>
     import {ref, reactive, computed} from 'vue';
 
+    // Random translate button
     const left = ref(0);
     const top = ref(0);
 
@@ -15,6 +16,7 @@
     const answer = ref(false);
     const showMore = ref(false);
 
+    // Api is used to get country, state, city
     var config = {
         cUrl: 'https://api.countrystatecity.in/v1/countries',
         cKey: 'NHhvOEcyWk50N2Vna3VFTE00bFp3MjFKR0ZEOUhkZlg4RTk1MlJlaA=='
@@ -49,48 +51,97 @@
             .catch(error => console.error(error));
     }
 
-    window.onload = loadCountries;
+    window.onload = loadCountries; // When web is loading will excute loadCountries function
 
-    var appId = '8023e1a0c0e3b8ce6950f19db954402b';
+    var appId = '8023e1a0c0e3b8ce6950f19db954402b'; // Phuong's appId for weather api
+    // This variable is used to store location you search by city and states
     const location = ref();
+    const latlon = ref({
+        lat: '',
+        lon: ''
+    });
+    const alertError = ref(false);
 
     const searchLatLon = computed(() => {
         console.log(selectedCountryCode.value, selectedStatesName.value);
         
+        // Actually, this api need 3 value: city's name, state's name, country's name but 
+        // the value about city's name of countries api above not suit to this city's name of weather api
+        // so I replace value of city's name by state's name
         fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${selectedStatesName.value}, ${selectedStatesName.value}, ${selectedCountryCode.value}&appid=${appId}`)
             .then(res => res.json())
             .then(data => {
                 location.value = data;
-                console.log(data);
+                console.log(location.value);
+                latlon.value.lat = location.value[0].lat;
+                latlon.value.lon = location.value[0].lon;
             })
-            .catch (error => console.error(error));        
+            .catch(error => console.error(error));
     }) 
     
-    let inforLocation = ref([]);
+    let inforLocation = ref([]); // This variable is to store weather's informatioon of location I want
 
+    // This variable is to store information of weather I want to display on screen
     let weatherLocation = ref({
         desc: 'Mostly Cloudy', /* description */
         icon: '', /*icon */
         temp: 20 + '°C', /*temperature */
+        humidity: 70 + '%',
         lname: 'Doha', /* location name */
         cname: 'Qatar' /* country name */
 
     })
-    
+
     const searchWeather = computed(() => {
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${location.value[0].lat}&lon=${location.value[0].lon}&appid=${appId}`)
+        selectedCityHistory.value.push(selectedStatesName.value);
+        
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latlon.value.lat}&lon=${latlon.value.lon}&appid=${appId}`)
+            .catch(error => {
+                    console.error(error);
+                    alertError.value = true;
+                })
             .then(res => res.json())
             .then(data => {
                 inforLocation.value = data;
                 weatherLocation.value.desc = inforLocation.value['weather'][0].description;
                 weatherLocation.value.temp = Math.round(inforLocation.value.main.temp - 273.15) + '°C';
+                weatherLocation.value.humidity = Math.round(inforLocation.value.main.humidity) + '%';
                 weatherLocation.value.lname = inforLocation.value.name;
                 weatherLocation.value.cname = inforLocation.value.sys.country;
-                console.log(inforLocation.value['weather'][0].icon);
                 weatherLocation.value.icon = `https://openweathermap.org/img/wn/${inforLocation.value['weather'][0].icon}@2x.png`;
             })
-            .catch(error => console.error(error));
+            .catch(error => {
+                console.error(error);
+                alertError.value = true;
+            });
     })
+
+    const selectedCityHistory = ref([]);
+    const selectedCity = ref();
+
+    const searchCityWeather = computed(() => {
+        console.log(selectedCity.value);
+        console.log(alertError.value);
+        if (alertError.value) selectedCityHistory.value.push(selectedCity.value);
+
+
+        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${selectedCity.value}&appid=${appId}`)
+            .then(res => res.json())
+            .then(data => {
+                inforLocation.value = data;
+                weatherLocation.value.desc = inforLocation.value['weather'][0].description;
+                weatherLocation.value.temp = Math.round(inforLocation.value.main.temp - 273.15) + '°C';
+                weatherLocation.value.humidity = Math.round(inforLocation.value.main.humidity) + '%';
+                weatherLocation.value.lname = inforLocation.value.name;
+                weatherLocation.value.cname = inforLocation.value.sys.country;
+                weatherLocation.value.icon = `https://openweathermap.org/img/wn/${inforLocation.value['weather'][0].icon}@2x.png`;
+            })
+            .catch(error => {
+                console.error(error);
+                alertError.value = true;
+            });
+    })
+
 </script>
 <template>
     <div>
@@ -104,20 +155,29 @@
         </div>
         <!-- Content -->
         <div v-if="answer" class="content flex center fade">
+            <div v-if="alertError" class="alert-error">
+                <h1>Not found this location!</h1>
+                <p @click="alertError = !alertError">X</p>
+            </div>
             <div class="weather--wrap flex center swipe-to-right" :class="{'swipe-to-left': showMore}">
-                <!-- Select location -->
-                <div class="location">
-                    <h3>Select Country, State, City</h3>
-                    <div class="location-wrap">
-                        <select class="country" @change="loadStates" v-model="selectedCountryCode">
-                            <option disabled value="">Select country</option>
-                            <option v-for="(item, index) in countries" :key="index" :value="item.iso2">{{ item.name}}</option>
-                        </select>
-                        <select class="state" @change="searchLatLon" v-model="selectedStatesName">
-                            <option disabled value="">Select state</option>
-                            <option v-for="(item, index) in states" :key="index" :value="item.name">{{ item.name }}</option>
-                        </select>
-                        <button @click="searchWeather">Check!</button>
+                <div class="city-location">
+                    <h3>HURRY UP! Select Your City 😎</h3>
+                    <div class="city-location-wrap">
+                        <select class="history"> /*History */
+                            <option disable value="">History</option>
+                            <option v-for="(item, index) in selectedCityHistory" :key="index" :value="item">{{ item }}</option>
+                        </select> 
+                        <div class="select-city-wrap">
+                            <select v-model="selectedCity"> /*Select city */
+                                <option disabled value="">Select City</option>
+                                <option value="Hà Nộ">Hà Nội</option>
+                                <option value="Thành phố Hồ Chí Minh">Thành phố Hồ Chí Minh</option>
+                                <option value="Bắc Kinh">Bắc Kinh</option>
+                                <option value="Tokyo">Tokyo</option>
+                            </select>
+                            <input type="text" placeholder="Enter city name" v-model="selectedCity">
+                        </div>
+                        <button @click="searchCityWeather">Check!</button>
                     </div>
                 </div>
                 <!-- Show weather -->
@@ -126,6 +186,7 @@
                         <img src="https://openweathermap.org/img/wn/10d@2x.png" :srcset="weatherLocation.icon" alt="">
                     </div>
                     <p class="weather-desc">{{ weatherLocation.desc }}</p>
+                    <p class="weather-desc weather-humidity">Độ ẩm: {{ weatherLocation.humidity }}</p>
                 </div>
                 <div class="line"></div>
                 <div class="weather-infor">
@@ -139,7 +200,20 @@
             </div>
             <div v-if="showMore" class="weather--more swipe-fade-to-right">
                 <div class="exit" @click="showMore = !showMore">x</div>
-                <p>no <br> more!</p>
+                <!-- <p>no <br> more!</p> -->
+                <!-- Select location -->
+                <div class="location">
+                    <h3>Check weather in Country, State</h3>
+                    <select @change="loadStates" v-model="selectedCountryCode">
+                        <option disabled value="">Select country</option>
+                        <option v-for="(item, index) in countries" :key="index" :value="item.iso2">{{ item.name}}</option>
+                    </select>
+                    <select @change="searchLatLon" v-model="selectedStatesName">
+                        <option disabled value="">Select state</option>
+                        <option v-for="(item, index) in states" :key="index" :value="item.name">{{ item.name }}</option>
+                    </select>
+                    <button @click="searchWeather">Check!</button>
+                </div>
             </div>
         </div>
     </div>
@@ -186,6 +260,23 @@ $fontText: "Kanit", sans-serif;
     transition: all 1s;
     position: relative;
 
+    .alert-error {
+        position: absolute;
+        top: 100px;
+        z-index: 999;
+        background-color: red;
+        border-radius: 10px;
+        padding: 8px 16px;
+
+        p {
+            position: absolute;
+            top: -17px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    }
+
     .weather--wrap {
         width: 890px;
         height: 400px;
@@ -195,22 +286,42 @@ $fontText: "Kanit", sans-serif;
         @extend .linear-bg;
         @extend .box-shadow;
 
-        
-        .location {
-            position: fixed;
-            top: 50px;
+        .city-location {
+            position: absolute;
+            top: -45%;
             text-align: center;
-            width: 60%;
             z-index: 999;
 
-            .location-wrap {
+            .city-location-wrap {
                 display: flex;
-                justify-content: space-around;
+                align-items: center;
+                gap: 30px;
+
+                select.history {
+                    width: 200px;
+                }
+            }
+
+            .select-city-wrap {
+                select {
+                    display: block;
+                    width: 100%;
+                    margin-bottom: 10px;
+                }
+
+                
+                input[type="text"] {
+                    padding: 6px 12px;
+                    border: 2px solid;
+                    border-radius: 5px;
+                    font-size: 18px;
+                }
             }
 
             select {
                 font-size: 20px;
-                width: 30%;
+                height: 37.2px;
+                width: 40%;
                 padding: 5px;
                 border: 2px solid;
                 border-radius: 5px;
@@ -219,17 +330,6 @@ $fontText: "Kanit", sans-serif;
             select:hover {
                 border-color: $primaryColor;
                 cursor: pointer;
-            }
-
-            button {
-                border: 2px solid;
-                transition: all .5s
-            }
-
-            button:hover {
-                background-color: $primaryColor;
-                color: #fff;
-                border-color: #939393;
             }
         }
 
@@ -260,6 +360,15 @@ $fontText: "Kanit", sans-serif;
                 transition: all .3s;
                 cursor: pointer;
             }
+
+            .weather-desc {
+                margin: 0;
+            }
+
+            .weather-humidity {
+                margin: 0;
+                font-size: 24px;
+            }
         }
 
         .weather-desc {
@@ -267,6 +376,10 @@ $fontText: "Kanit", sans-serif;
             font-weight: 200;
             font-size: 32px;
             color: $thirdColor;
+        }
+
+        .weather-desc::first-letter {
+            text-transform: uppercase;
         }
 
         .line {
@@ -351,6 +464,45 @@ $fontText: "Kanit", sans-serif;
             text-align: center;
             font-weight: bold;
             color: $thirdColor;
+        }
+
+        
+        .location {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+            width: 100%;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+
+            select {
+                display: block;
+                font-size: 20px;
+                width: 80%;
+                padding: 5px;
+                border: 2px solid;
+                border-radius: 5px;
+            }
+
+            select:hover {
+                border-color: $primaryColor;
+                cursor: pointer;
+            }
+
+            button {
+                border: 2px solid;
+                transition: all .5s
+            }
+
+            button:hover {
+                background-color: $primaryColor;
+                color: #fff;
+                border-color: #939393;
+            }
         }
     }
 }
