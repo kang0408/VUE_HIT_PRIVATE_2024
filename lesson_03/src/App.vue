@@ -29,6 +29,10 @@ const alertMessage = () => {
 const checked = ref(false);
 const gender = ref();
 const selected = ref("");
+
+function loadSelected() {
+  console.log(selected.value);
+}
 </script>
 
 <template>
@@ -59,10 +63,10 @@ const selected = ref("");
     <label for="male">male</label>
 
     <p>Seleted: {{ selected }}</p>
-    <select v-model="selected">
+    <select v-model="selected" @change="loadSelected">
       <option disabled value="">Pls select one</option>
-      <option value="A">A</option>
-      <option value="B">B</option>
+      <option value="A">Khang</option>
+      <option value="B">Danh</option>
       <option value="C">C</option>
     </select>
   </div>
