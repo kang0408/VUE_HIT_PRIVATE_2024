@@ -92,9 +92,7 @@
 
     })
 
-    const searchWeather = computed(() => {
-        selectedCityHistory.value.push(selectedStatesName.value);
-        
+    const searchWeather = computed(() => {        
         fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latlon.value.lat}&lon=${latlon.value.lon}&appid=${appId}`)
             .catch(error => {
                     console.error(error);
@@ -117,11 +115,12 @@
     })
 
     const selectedCityHistory = ref([]);
-    const selectedCity = ref();
+    const selectedCity = ref('');
 
     const searchCityWeather = computed(() => {
         console.log(selectedCity.value);
-        if (!alertError.value) selectedCityHistory.value.push(selectedCity.value);
+        if (!alertError.value) {}
+        selectedCityHistory.value.push(selectedCity.value);
 
         fetch(`https://api.openweathermap.org/data/2.5/weather?q=${selectedCity.value}&appid=${appId}`)
             .then(res => res.json())
@@ -161,14 +160,14 @@
                 <div class="city-location">
                     <h3>HURRY UP! Select Your City 😎</h3>
                     <div class="city-location-wrap">
-                        <select class="history"> /*History */
+                        <select class="history" v-model="selectedCity"> /*History */
                             <option disable value="">History</option>
                             <option v-for="(item, index) in selectedCityHistory" :key="index" :value="item">{{ item }}</option>
                         </select> 
                         <div class="select-city-wrap">
                             <select v-model="selectedCity"> /*Select city */
                                 <option disabled value="">Select City</option>
-                                <option value="Hà Nộ">Hà Nội</option>
+                                <option value="Hà Nội">Hà Nội</option>
                                 <option value="Thành phố Hồ Chí Minh">Thành phố Hồ Chí Minh</option>
                                 <option value="Bắc Kinh">Bắc Kinh</option>
                                 <option value="Tokyo">Tokyo</option>
