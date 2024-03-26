@@ -121,9 +121,7 @@
 
     const searchCityWeather = computed(() => {
         console.log(selectedCity.value);
-        console.log(alertError.value);
-        if (alertError.value) selectedCityHistory.value.push(selectedCity.value);
-
+        if (!alertError.value) selectedCityHistory.value.push(selectedCity.value);
 
         fetch(`https://api.openweathermap.org/data/2.5/weather?q=${selectedCity.value}&appid=${appId}`)
             .then(res => res.json())
