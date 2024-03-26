@@ -57,7 +57,7 @@
     const searchLatLon = computed(() => {
         console.log(selectedCountryCode.value, selectedStatesName.value);
         
-        fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${selectedStatesName.value}, ${selectedStatesName.value}, ${selectedCountryCode.value}&appid=${appId}`)
+        fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${selectedStatesName.value}, ${selectedStatesName.value}, ${selectedCountryCode.value}&appid=${appId}`)
             .then(res => res.json())
             .then(data => {
                 location.value = data;
