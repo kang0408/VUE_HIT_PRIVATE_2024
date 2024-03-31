@@ -144,9 +144,9 @@
     <div>
         <!-- Welcome -->
         <div v-if="!answer" class="question fade flex center">
-            <h1>Ngoài bị điên ra bạn còn bị gì nữa không?</h1>
+            <h1>Bạn có phải là Khang không đấy?</h1>
             <div class="answer">
-                <button @click="answer = !answer">Có</button>
+                <button @click="answer = !answer">Đúng</button>
                 <button class="ignoredButton" @click="randomPos" :style="{left: left + 'px', top: top + 'px'}">Không</button>
             </div>
         </div>
