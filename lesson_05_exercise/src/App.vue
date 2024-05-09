@@ -79,13 +79,15 @@ async function registerHandler(newAccount, errorRegister, registerSuccessful) {
   }
 }
 
-async function changePassword(password) {
+async function changePassword(password, changePasswordStatus) {
   try {
     const res = await $api.post("/user/change-password", password);
     console.log(res);
-    console.log(password);
+    changePasswordStatus.success = true;
   } catch (error) {
     console.log(error);
+    changePasswordStatus.error = true;
+    changePasswordStatus.errorMsg = error.response.data.message.newPassword;
   }
 }
 
