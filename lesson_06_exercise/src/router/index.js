@@ -13,17 +13,17 @@ export const router = createRouter({
           component: () => import("../pages/index.vue"),
         },
         {
-          path: "/login",
+          path: "login",
           name: "Login",
           component: () => import("../components/login.vue"),
         },
         {
-          path: "/register",
+          path: "register",
           name: "Register",
           component: () => import("../components/register.vue"),
         },
         {
-          path: "/profile/:user",
+          path: "profile/:user",
           name: "Profile",
           component: () => import("../components/profile.vue"),
         },

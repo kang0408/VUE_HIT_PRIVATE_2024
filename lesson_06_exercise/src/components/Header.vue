@@ -36,8 +36,8 @@ function logOut() {
       <router-link to="/">Home</router-link>
     </div>
     <div v-if="!profileStore.isLoggedIn" class="before-login">
-      <button @click="router.push('Login')" class="btn--login">LOGIN</button>
-      <button @click="router.push('Register')" class="btn--register">
+      <button @click="router.push('/login')" class="btn--login">LOGIN</button>
+      <button @click="router.push('/register')" class="btn--register">
         REGISTER
       </button>
     </div>
