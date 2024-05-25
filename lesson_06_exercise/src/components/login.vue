@@ -49,9 +49,9 @@ async function loginHandler() {
 
 const successValid = ref(false);
 const text = ref("Hello");
-const emits = defineEmits("login-success");
+const emits = defineEmits("loginSuccess");
 function loginSuccess() {
-  emits("login-success");
+  emits("loginSuccess");
 }
 
 const regex = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;

@@ -23,8 +23,9 @@ const errorLogin = reactive({
   },
 });
 
+const text = "Hello world~";
 function loginHandler() {
-  emits("login-handler", account, errorLogin);
+  emits("login-handler", account, errorLogin, text);
 }
 
 function switchRegister() {

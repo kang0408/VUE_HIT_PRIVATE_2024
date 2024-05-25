@@ -21,36 +21,39 @@ onBeforeMount(async () => {
   } catch {}
 });
 
-async function loginHandler(account, errorLogin) {
-  try {
-    const res = await $api.post("auth/login", account);
-    console.log(res.data);
-    if (res.data.status === "SUCCESS") {
-      loginSuccess.value = true;
-    }
-    localStorage.setItem("hit14-vuejs:access-token", res.data.data.accessToken);
-
-    const userRes = await $api.get("user/me");
-    Object.assign(user, userRes.data.data);
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-
-    if (!error.response.data.message.email) {
-      errorLogin.errorMessage.error = true;
-      errorLogin.errorMessage.errorMsg = error.response.data.message;
-
-      errorLogin.email.error = false;
-      errorLogin.password.error = false;
-    } else {
-      errorLogin.email.error = true;
-      errorLogin.email.errorMsg = error.response.data.message.email;
-
-      errorLogin.password.error = true;
-      errorLogin.password.errorMsg = error.response.data.message.password;
-    }
-  }
+function loginHandler(account, errorLogin, text) {
+  console.log(text);
 }
+// async function loginHandler(account, errorLogin, text) {
+//   try {
+//     const res = await $api.post("auth/login", account);
+//     console.log(res.data);
+//     if (res.data.status === "SUCCESS") {
+//       loginSuccess.value = true;
+//     }
+//     localStorage.setItem("hit14-vuejs:access-token", res.data.data.accessToken);
+
+//     const userRes = await $api.get("user/me");
+//     Object.assign(user, userRes.data.data);
+//     console.log(user);
+//   } catch (error) {
+//     console.log(error);
+
+//     if (!error.response.data.message.email) {
+//       errorLogin.errorMessage.error = true;
+//       errorLogin.errorMessage.errorMsg = error.response.data.message;
+
+//       errorLogin.email.error = false;
+//       errorLogin.password.error = false;
+//     } else {
+//       errorLogin.email.error = true;
+//       errorLogin.email.errorMsg = error.response.data.message.email;
+
+//       errorLogin.password.error = true;
+//       errorLogin.password.errorMsg = error.response.data.message.password;
+//     }
+//   }
+// }
 
 async function registerHandler(newAccount, errorRegister, registerSuccessful) {
   try {
